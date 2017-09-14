@@ -1,10 +1,7 @@
 language: python
 python:
   - "2.7"
-  #- "3.3"
-  - "3.4"
-  - "3.5"
-sudo: false
+
 
 addons:
   apt:
@@ -31,8 +28,18 @@ before_install:
   # Replace dep1 dep2 ... with your dependencies
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose pandas statsmodels coverage netCDF4
 
-# command to install dependencies
+   # add for profile
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  - sudo apt-get update -qq
+
+
 install:
+# add for profile
+  - sudo apt-get install -qq g++-4.8
+  - export CXX="g++-4.8"
+  - pip install nose-cprof
+  - pip install properform
+
   # Coverage packages are on my binstar channel
   # - conda install --yes -c dan_blanchard python-coveralls nose-cov
   - source activate test-environment
@@ -42,7 +49,11 @@ install:
 # command to run tests
 script: 
   #- nosetests
-  - nosetests  --with-coverage --cover-package=pysat
+  - nosetests  --with-coverage --cover-package=pysat --with-cprofile --cprofile-stats-erase --cprofile-stats-file=profile_pysat_cfe96dc47c_0
+  - python -m properform Push 47.88.50.110:15554 asdf_pysat_cfe96dc47c_0 ./profile_pysat_cfe96dc47c_0
+
+
   #coverage run --source=pysat setup.py test
 after_success:
   coveralls
+ #2017-09-14 12:27:35 modified at 0
